@@ -80,14 +80,14 @@ public class TelaToDoListV1 extends javax.swing.JFrame {
 
         jTableTarefas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null}
+                {null, null, null, null}
             },
             new String [] {
-                "Tarefa", "Status", "Data"
+                "Tarefa", "Status", "Data", "Data Conclusão"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -207,26 +207,27 @@ public class TelaToDoListV1 extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAdicionarTarefaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAdicionarTarefaActionPerformed
-        if (jTextFieldDescricaoTarefa.getText().isEmpty()){
-            JOptionPane.showMessageDialog(null, "A descrição da tarefa não pode ser vazia");
-            return;
-        }
+        if (jTextFieldDescricaoTarefa.getText().trim().isEmpty()){
+        JOptionPane.showMessageDialog(null, "A descrição da tarefa não pode ser vazia");
+        return;
+    }
         
-        if (hasTarefaRepetida(jTextFieldDescricaoTarefa.getText())){
-            JOptionPane.showMessageDialog(null, "A tarefa " + jTextFieldDescricaoTarefa.getText() + " já existe na lista!");
-            
-            return;
-        }
+       if (hasTarefaRepetida(jTextFieldDescricaoTarefa.getText())){
+        JOptionPane.showMessageDialog(null, "A tarefa " + jTextFieldDescricaoTarefa.getText() + " já existe na lista!");
+        return;
+    }   
         
         LocalDateTime dataAtual = LocalDateTime.now();
-        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        
-        tarefas.add(jTextFieldDescricaoTarefa.getText() + ";" + NAO_CONCLUIDA  + ";" + dataAtual.format(formato));
+    DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    
+        tarefas.add(jTextFieldDescricaoTarefa.getText() + ";" + NAO_CONCLUIDA + ";" + dataAtual.format(formato) + ";-");
         
         salvarTarefa(); 
         
-        atualizarEstatisticas();
+        filtrarTabela();
         
+        atualizarEstatisticas();
+            
         preencherTabela();
         
         jTextFieldDescricaoTarefa.setText("");
@@ -246,7 +247,16 @@ public class TelaToDoListV1 extends javax.swing.JFrame {
         
         String[] dados = tarefas.get(indiceTarefaSelecionada).split(";");
         
-        tarefas.set(indiceTarefaSelecionada, dados[0] + ";" + CONCLUIDA + ";" + dados[2]);
+        if(dados[1].equals(CONCLUIDA)){
+            JOptionPane.showMessageDialog(null, "Está tarefa já foi concluída!");
+            return;
+        }
+        
+        LocalDateTime agora = LocalDateTime.now();
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String dataConclusao = agora.format(formato);
+        
+        tarefas.set(indiceTarefaSelecionada, dados[0] + ";" + CONCLUIDA + ";" + dados[2] + ";" + dataConclusao);
         
         salvarTarefa();
         
@@ -317,7 +327,8 @@ public class TelaToDoListV1 extends javax.swing.JFrame {
             model.addRow(new Object[]{
                 dados[0],
                 dados[1],
-                dados[2]
+                dados[2],
+                dados[3]
             });
         }
     }
